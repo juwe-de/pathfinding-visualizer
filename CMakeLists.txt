@@ -5,6 +5,7 @@ project(pathfinding-visualizer)
 set(SOURCES
     src/main.cpp
     src/glad.c
+    src/application.cpp
 )
 set(IMGUI_SOURCES
     external/imgui/imgui.cpp
