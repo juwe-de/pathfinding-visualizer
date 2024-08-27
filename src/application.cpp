@@ -1,13 +1,21 @@
 #include "application.h"
 #include "glad/glad.h"
+#include "graph.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
 #include <GLFW/glfw3.h>
+#include <memory>
 #include <iostream>
 
+#define TILE_BORDER_COLOR IM_COL32(150, 150, 150, 255)
+
 int Application::run() {
+
+    std::unique_ptr<Graph> graph = std::make_unique<Graph>(GRID_ROWS, GRID_COLS);
+
+    // ---------------------------------------------
 
     GLFWwindow* window;
 
@@ -61,7 +69,7 @@ int Application::run() {
             for(auto j = 0; j < GRID_COLS; j++) {
 
                 backgroundDrawList->AddRectFilled(tilePos, ImVec2(tilePos.x + tileSize, tilePos.y + tileSize), IM_COL32(255, 255, 255, 255));
-                foregroundDrawList->AddRect(tilePos, ImVec2(tilePos.x + tileSize, tilePos.y + tileSize), IM_COL32(150, 150, 150, 255));
+                foregroundDrawList->AddRect(tilePos, ImVec2(tilePos.x + tileSize, tilePos.y + tileSize), TILE_BORDER_COLOR, 0, 0, 0.5f);
                 tilePos.x += tileSize;
 
             }
