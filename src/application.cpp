@@ -7,13 +7,13 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-int application::run() {
+int Application::run() {
 
     GLFWwindow* window;
 
     if(!glfwInit()) return -1;
 
-    window = glfwCreateWindow(640, 400, "Window", NULL, NULL);
+    window = glfwCreateWindow(640, 400, "Pathfinding Visualizer", NULL, NULL);
     glfwMakeContextCurrent(window);
 
     IMGUI_CHECKVERSION();
@@ -38,6 +38,9 @@ int application::run() {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
+        ImDrawList* backgroundDrawList = ImGui::GetBackgroundDrawList();
+
         // ===============
         // GUI STARTS HERE
         // ===============
@@ -57,7 +60,8 @@ int application::run() {
 
             for(auto j = 0; j < GRID_COLS; j++) {
 
-                ImGui::GetForegroundDrawList()->AddRect(tilePos, ImVec2(tilePos.x + tileSize, tilePos.y + tileSize), IM_COL32(150, 150, 150, 255));
+                backgroundDrawList->AddRectFilled(tilePos, ImVec2(tilePos.x + tileSize, tilePos.y + tileSize), IM_COL32(255, 255, 255, 255));
+                foregroundDrawList->AddRect(tilePos, ImVec2(tilePos.x + tileSize, tilePos.y + tileSize), IM_COL32(150, 150, 150, 255));
                 tilePos.x += tileSize;
 
             }
@@ -68,7 +72,7 @@ int application::run() {
         }
 
         gridBottomRight = tilePos;
-        ImGui::GetForegroundDrawList()->AddRect(gridUpperLeft, gridBottomRight, IM_COL32(0, 0, 0, 255), 0, 0, 3.0f);
+        foregroundDrawList->AddRect(gridUpperLeft, gridBottomRight, IM_COL32(0, 0, 0, 255), 0, 0, 3.0f);
         
         // ===============
         // GUI ENDS HERE

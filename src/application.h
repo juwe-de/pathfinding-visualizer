@@ -4,7 +4,7 @@
 #define GRID_ROWS 50
 #define GRID_COLS 80
 
-namespace application {
+namespace Application {
 
     int run();
 
