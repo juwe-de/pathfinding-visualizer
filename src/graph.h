@@ -9,18 +9,21 @@ using std::map, std::vector;
 
 class Graph {
 
+public:
     struct Node {
+        int id;
         int x;
         int y;
 
-        Node(int gridX, int gridY);
+        Node(const int gridX, const int gridY, const int cols);
 
-        friend bool operator<(const Node &a, const Node &b) { return a.x < b.x && a.y < b.y; }
+        friend bool operator<(const Node &a, const Node &b) { return a.id < b.id; }
+        friend bool operator==(const Node &a, const Node &b) { return a.x == b.x && a.y == b.y; }
     };
 
-public:
-    Graph(int rows, int cols);
+    Graph(const int rows, const int cols);
     void addEdge(const Node a, const Node b); 
+
     vector<Node> getNeighbours(const Node node) const;
 
 private:
