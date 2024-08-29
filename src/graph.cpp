@@ -1,5 +1,7 @@
 #include "graph.h"
 
+#include <algorithm>
+
 Graph::Node::Node(const int gridX, const int gridY, const int cols): id(gridY * cols + gridX), x(gridX), y(gridY) {}
 
 Graph::Graph(int rows, int cols) {
@@ -24,6 +26,23 @@ void Graph::addEdge(const Node a, const Node b) {
     
 }
 
-vector<Graph::Node> Graph::getNeighbours(const Node node) const {
+void Graph::removeAllNeighbors(const Node node) {
+    
+    vector<Node> neighbors = m_adjList->at(node);
+
+    if(neighbors.empty()) return;
+
+    for(Node &neihgbor : neighbors) {
+
+        auto nodePos = std::find(m_adjList->at(neihgbor).begin(), m_adjList->at(neihgbor).end(), node);
+        if(nodePos != m_adjList->at(neihgbor).end()) m_adjList->at(neihgbor).erase(nodePos);
+
+    }
+
+    m_adjList->at(node) = vector<Node>();
+
+}
+
+vector<Graph::Node> Graph::getNeighbors(const Node node) const {
     return m_adjList->at(node);
 }

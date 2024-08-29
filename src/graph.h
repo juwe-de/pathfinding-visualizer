@@ -18,13 +18,15 @@ public:
         Node(const int gridX, const int gridY, const int cols);
 
         friend bool operator<(const Node &a, const Node &b) { return a.id < b.id; }
-        friend bool operator==(const Node &a, const Node &b) { return a.x == b.x && a.y == b.y; }
+        friend bool operator==(const Node &a, const Node &b) { return a.id == b.id; }
+        friend bool operator!=(const Node &a, const Node &b) { return !operator==(a, b); }
     };
 
     Graph(const int rows, const int cols);
-    void addEdge(const Node a, const Node b); 
+    void addEdge(const Node a, const Node b);
+    void removeAllNeighbors(const Node node); 
 
-    vector<Node> getNeighbours(const Node node) const;
+    vector<Node> getNeighbors(const Node node) const;
 
 private:
     std::unique_ptr<map<Node, vector<Node>>> m_adjList;

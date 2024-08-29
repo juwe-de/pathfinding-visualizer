@@ -6,25 +6,84 @@
 #include "backends/imgui_impl_opengl3.h"
 
 #include <algorithm>
+#include <cmath>
 #include <GLFW/glfw3.h>
 #include <memory>
 #include <iostream>
+#include <utility>
 
 #define TILE_BORDER_COLOR IM_COL32(150, 150, 150, 150)
 #define BLACK IM_COL32(0, 0, 0, 255)
 #define WHITE IM_COL32(255, 255, 255, 255)
 
-#define GRID_ROWS 50
-#define GRID_COLS 80
+#define NODE_NULL Graph::Node(-1, -1, 0)
+
+#define GRID_ROWS 40
+#define GRID_COLS 60
 
 template <typename T>
 bool vectorHasElement(vector<T> vec, T el) {
     return std::find(vec.begin(), vec.end(), el) != vec.end();
 }
 
+std::pair<Graph::Node, Graph::Node> toBeConnected = std::make_pair<Graph::Node, Graph::Node>(NODE_NULL, NODE_NULL);
+
+Graph::Node getNodeUnderMouse(const ImVec2 mousePos, const ImVec2 gridUpperLeft, const ImVec2 gridBottomRight, float tileSize) {
+
+    if(mousePos.x < gridUpperLeft.x || mousePos.x > gridBottomRight.x || mousePos.y < gridUpperLeft.y || mousePos.y > gridBottomRight.y) return NODE_NULL;
+
+    ImVec2 tileCoordinates = ImVec2(std::floor((mousePos.x - gridUpperLeft.x) / tileSize), std::floor((mousePos.y - gridUpperLeft.y) / tileSize));
+    Graph::Node nodeUnderMouse = Graph::Node(tileCoordinates.x, tileCoordinates.y, GRID_COLS);
+
+    return nodeUnderMouse;
+
+}
+
+void handleLeftMouseButton(const std::shared_ptr<Graph> graph, const ImVec2 gridUpperLeft, const ImVec2 gridBottomRight, const float tileSize) {
+
+    if(!ImGui::IsMouseDown(ImGuiMouseButton_Left)) return;
+
+    ImVec2 mousePos = ImGui::GetMousePos();
+
+    Graph::Node nodeUnderMouse = getNodeUnderMouse(mousePos, gridUpperLeft, gridBottomRight, tileSize);
+    if(nodeUnderMouse == NODE_NULL) return;
+
+    if(toBeConnected.first == NODE_NULL) {
+        toBeConnected.first = nodeUnderMouse;
+        return;
+    }  
+    
+    if(toBeConnected.first == nodeUnderMouse) return;
+
+    toBeConnected.second = nodeUnderMouse;
+
+    // tiles are diagonally aligned; not next to each other
+    if(std::abs(toBeConnected.first.x - toBeConnected.second.x) + std::abs(toBeConnected.first.y - toBeConnected.second.y) > 1) {
+        toBeConnected.first = toBeConnected.second;
+        return;
+    }
+
+    graph->addEdge(toBeConnected.first, toBeConnected.second);
+    toBeConnected.first = toBeConnected.second;
+
+}
+
+void handleRightMouseButton(const std::shared_ptr<Graph> graph, const ImVec2 gridUpperLeft, const ImVec2 gridBottomRight, const float tileSize) {
+
+    if(!ImGui::IsMouseDown(ImGuiMouseButton_Right)) return;
+
+    ImVec2 mousePos = ImGui::GetMousePos();
+
+    Graph::Node nodeUnderMouse = getNodeUnderMouse(mousePos, gridUpperLeft, gridBottomRight, tileSize);
+    if(nodeUnderMouse == NODE_NULL) return;
+
+    graph->removeAllNeighbors(nodeUnderMouse);
+
+}
+
 int Application::run() {
 
-    std::unique_ptr<Graph> graph = std::make_unique<Graph>(GRID_ROWS, GRID_COLS);
+    std::shared_ptr<Graph> graph = std::make_shared<Graph>(GRID_ROWS, GRID_COLS);
 
     // ---------------------------------------------
 
@@ -83,7 +142,7 @@ int Application::run() {
                 foregroundDrawList->AddRect(tilePos, ImVec2(tilePos.x + tileSize, tilePos.y + tileSize), TILE_BORDER_COLOR, 0, 0, 0.2f);
 
                 Graph::Node currentNode = Graph::Node(col, row, GRID_COLS);
-                vector<Graph::Node> neighbourNodes = col >= 0 && row >= 0 ? graph->getNeighbours(currentNode) : vector<Graph::Node>();
+                vector<Graph::Node> neighbourNodes = col >= 0 && row >= 0 ? graph->getNeighbors(currentNode) : vector<Graph::Node>();
 
                 if(!vectorHasElement<Graph::Node>(neighbourNodes, Graph::Node(col - 1, row, GRID_COLS))) {
                     foregroundDrawList->AddLine(tilePos, ImVec2(tilePos.x, tilePos.y + tileSize), BLACK, 3.0f);
@@ -109,6 +168,9 @@ int Application::run() {
 
         gridBottomRight = tilePos;
         foregroundDrawList->AddRect(gridUpperLeft, gridBottomRight, BLACK, 0, 0, 3.0f);
+
+        handleLeftMouseButton(graph, gridUpperLeft, gridBottomRight, tileSize);
+        handleRightMouseButton(graph, gridUpperLeft, gridBottomRight, tileSize);
         
         // ===============
         // GUI ENDS HERE
