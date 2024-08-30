@@ -23,6 +23,7 @@ public:
     };
 
     Graph(const int rows, const int cols);
+    void resize(const int rows, const int cols);
     void addEdge(const Node a, const Node b);
     void removeAllNeighbors(const Node node); 
 
